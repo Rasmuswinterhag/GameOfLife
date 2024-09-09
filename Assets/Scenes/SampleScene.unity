@@ -258,7 +258,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88211193c5b794d4cb4c61b57c660215, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GameSize: {x: 100, y: 100}
+  GameSize: {x: 30, y: 30}
   spriteRendererPrefab: {fileID: 8233146493947010484, guid: 2f689aee03d618445b437ebb8846d797, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

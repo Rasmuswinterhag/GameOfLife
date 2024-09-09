@@ -56,5 +56,6 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "GameOfLife - Rasmus Winterhag.sln"
+    "dotnet.defaultSolution": "GameOfLife.sln",
+    "dotnet.preferCSharpExtension": true
 }
