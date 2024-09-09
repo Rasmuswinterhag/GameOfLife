@@ -5,8 +5,12 @@ using UnityEngine;
 
 public class Cell
 {
-    public Cell()
+    bool alive;
+    int neighbors;
+    SpriteRenderer sr;
+    public Vector2 position;
+    public Cell(SpriteRenderer spriteRenderer)
     {
-        
+        sr = spriteRenderer;
     }
 }

@@ -7,10 +7,11 @@ public class Manager : MonoBehaviour
 {
     [SerializeField] Vector2Int GameSize = new(3,3);
     Cell[][] grid;
+    [SerializeField] SpriteRenderer spriteRendererPrefab;
 
     void Start()
     {
-        Application.targetFrameRate = 30;
+        //Application.targetFrameRate = 30;
 
         grid = new Cell[GameSize.x][];
 
@@ -20,11 +21,13 @@ public class Manager : MonoBehaviour
 
             for (int y = 0; y < GameSize.y; y++)
             {
-                grid[x][y] = new Cell();
+                var sr = Instantiate(spriteRendererPrefab, new Vector2(x, y), Quaternion.identity);
+
+                grid[x][y] = new Cell(sr);
+                grid[x][y].position = new Vector2(x, y);
+                
+                Debug.Log(grid[x][y].position);
             }
         }
-
-        Debug.Log(grid);
     }
-
 }
