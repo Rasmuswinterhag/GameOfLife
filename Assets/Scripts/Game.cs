@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,6 +9,7 @@ public class Cell
     public bool willBeAlive;
     SpriteRenderer sr;
     public Vector2 position;
+    int stableTicks = 0;
 
     public Cell(SpriteRenderer spriteRenderer, float aliveChance, Vector2 spawnPosition)
     {
@@ -23,7 +25,7 @@ public class Cell
     {
         if(alive)
         {
-            sr.color = Color.white;
+            sr.color = Color.Lerp(Color.white, Color.green, stableTicks * 0.1f);
         }
         else
         {
@@ -31,8 +33,16 @@ public class Cell
         }
     }
 
-    public void SetNewState()
+    public void SetNewState(bool countStability)
     {
+            if (alive == willBeAlive && countStability)
+            {
+                stableTicks++;
+            }
+            else 
+            {
+                stableTicks = 0;
+            }
         alive = willBeAlive;
         UpdateTetxure();
     }
@@ -42,31 +52,40 @@ public class Cell
 
 
 
-public class Manager : MonoBehaviour
+public class Game : MonoBehaviour
 {
     [Header("Game Settings")]
-    [SerializeField] Vector2Int gameSize = new(160,90);
-    [SerializeField,Range(0,1)] float aliveChance = 0.2f;
-    float tickRate;
     [SerializeField] SpriteRenderer spriteRendererPrefab;
-    [SerializeField] bool pause = false;
+    Vector2Int gameSize = new(160,90);
+    float tickRate = 0.2f;
+    float aliveChance = 0.2f;
+    bool pause = false;
 
     [Header("UI References")]
     [SerializeField] TextMeshProUGUI tickrateSliderValueText;
     [SerializeField] Slider tickrateSlider;
     [SerializeField] TextMeshProUGUI pauseButtonText;
+    [SerializeField] TextMeshProUGUI aliveChanceSliderValueText;
+    [SerializeField] Slider aliveChanceSlider;
 
     [Header("Hidden Varables")]
     Cell[][] grid;
     float tickTimer = 0;
-    bool freezeOneFrame = false;
     Vector2Int lastDrawPos;
     bool drew;
 
     void Start()
     {
         Application.targetFrameRate = 60;
-        FixCamera();
+        gameSize = Messanger.instance.menuGameSize;
+        aliveChance = Messanger.instance.menuAliveChance;
+        
+        aliveChanceSlider.value = aliveChance;
+        AliveChanceSlider(aliveChance);
+
+        tickRate = tickrateSlider.value;
+        TickSlider(tickRate);
+
 
         grid = new Cell[gameSize.x][];
         for (int x = 0; x < gameSize.x; x++)
@@ -79,9 +98,7 @@ public class Manager : MonoBehaviour
                 grid[x][y] = new Cell(sr, aliveChance, new Vector2(x,y));
             }
         }
-
-        tickRate = tickrateSlider.value;
-        TickSlider(tickRate);
+        FixCamera();
     }
 
     void Update()
@@ -100,13 +117,7 @@ public class Manager : MonoBehaviour
     }
 
     void Tick()
-    {
-        if(freezeOneFrame)
-        {
-            freezeOneFrame = false;
-            return;
-        }
-        
+    {   
         for (int x = 0; x < gameSize.x; x++)
         {
             for (int y = 0; y < gameSize.y; y++)
@@ -145,7 +156,7 @@ public class Manager : MonoBehaviour
         {
             for (int y = 0; y < gameSize.y; y++)
             {
-                grid[x][y].SetNewState();
+                grid[x][y].SetNewState(true);
             }
         }
     }
@@ -160,7 +171,7 @@ public class Manager : MonoBehaviour
             if(lastDrawPos != mousePos)
             {
                 grid[mousePos.x][mousePos.y].willBeAlive = drew;
-                grid[mousePos.x][mousePos.y].SetNewState();
+                grid[mousePos.x][mousePos.y].SetNewState(false);
                 lastDrawPos = mousePos;
             }
         }
@@ -172,6 +183,7 @@ public class Manager : MonoBehaviour
         Camera.main.transform.position = new Vector3(gameSize.x/2f, gameSize.y/2f, -10) - new Vector3(0.5f,0.5f);
         Camera.main.orthographicSize = Mathf.Max(gameSize.y/2f, gameSize.x/(2f*Camera.main.aspect));
     }
+
 
     #region UI
         public void PauseButton()
@@ -194,9 +206,42 @@ public class Manager : MonoBehaviour
 
             tickRate = value;
         }
+
         public void TickButton()
         {
             Tick();
         }
+
+        public void Clear()
+        {
+            for (int x = 0; x < gameSize.x; x++)
+            {
+                for (int y = 0; y < gameSize.y; y++)
+                {
+                    grid[x][y].willBeAlive = false;
+                }
+            }
+            UpdateCellState();
+        }
+
+        public void Generate()
+        {
+            for (int x = 0; x < gameSize.x; x++)
+            {
+                for (int y = 0; y < gameSize.y; y++)
+                {
+                    grid[x][y].willBeAlive = aliveChance > Random.Range(0f,1f);
+                }
+            }
+            UpdateCellState();
+        }
+
+        public void AliveChanceSlider(float value)  
+        {
+            aliveChanceSliderValueText.text = (value * 100).ToString("0") + "%";
+
+            aliveChance = value;
+        }
+
     #endregion
 }
