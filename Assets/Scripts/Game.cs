@@ -77,6 +77,7 @@ public class Game : MonoBehaviour
     void Start()
     {
         Application.targetFrameRate = 60;
+
         gameSize = Messanger.instance.menuGameSize;
         aliveChance = Messanger.instance.menuAliveChance;
         
@@ -86,7 +87,6 @@ public class Game : MonoBehaviour
         tickRate = tickrateSlider.value;
         TickSlider(tickRate);
 
-
         grid = new Cell[gameSize.x][];
         for (int x = 0; x < gameSize.x; x++)
         {
@@ -94,11 +94,13 @@ public class Game : MonoBehaviour
 
             for (int y = 0; y < gameSize.y; y++)
             {
-                var sr = Instantiate(spriteRendererPrefab, new Vector2(x, y), Quaternion.identity);
+                var sr = Instantiate(spriteRendererPrefab, new Vector2(x, y), Quaternion.identity, transform);
                 grid[x][y] = new Cell(sr, aliveChance, new Vector2(x,y));
             }
         }
+
         FixCamera();
+
     }
 
     void Update()

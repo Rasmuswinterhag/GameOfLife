@@ -1159,6 +1159,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40de0eebbffee1e4696a1f2e466b3d0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mouseSensativity: 50
+  scrollSensativity: 3
+  keyboardSpeed: 2
 --- !u!1 &558556551
 GameObject:
   m_ObjectHideFlags: 0
