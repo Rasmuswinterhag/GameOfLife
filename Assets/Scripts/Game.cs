@@ -60,8 +60,13 @@ public class Game : MonoBehaviour
     float tickRate = 0.2f;
     float aliveChance = 0.2f;
     bool pause = false;
+    
+    [Header("Custom Rules")]
+    [SerializeField] bool customRules = false;
+    [SerializeField] bool gravityIshRule = false;
 
     [Header("UI References")]
+    [SerializeField] UIManager canvas;
     [SerializeField] TextMeshProUGUI tickrateSliderValueText;
     [SerializeField] Slider tickrateSlider;
     [SerializeField] TextMeshProUGUI pauseButtonText;
@@ -105,7 +110,7 @@ public class Game : MonoBehaviour
 
     void Update()
     {
-        Draw();
+        if(!canvas.mouseOverUI) { Draw(); }
         if(!pause)
         {
             tickTimer += Time.deltaTime;
@@ -116,6 +121,10 @@ public class Game : MonoBehaviour
             }
         }
 
+        if(Input.GetKeyDown(KeyCode.H))
+        {
+            canvas.GetComponent<Canvas>().enabled = !canvas.GetComponent<Canvas>().enabled;
+        }
     }
 
     void Tick()
@@ -129,10 +138,16 @@ public class Game : MonoBehaviour
                 if(aliveNeighbors < 2) { grid[x][y].willBeAlive = false; }
                 if(aliveNeighbors > 3) { grid[x][y].willBeAlive = false; }
                 if(aliveNeighbors == 3) { grid[x][y].willBeAlive = true; }
+                if(customRules) { CustomRules(x, y, aliveNeighbors); }
             }
         }
         UpdateCellState();
     }
+
+    void CustomRules(int x, int y, int aliveNeighbors)
+    {
+        if(gravityIshRule && y+1 < gameSize.y-1) { if(aliveNeighbors == 1 && grid[x][y+1].alive) { grid[x][y].willBeAlive = true;} } //kinda adds gravity
+    } 
 
     int AliveNeighbors(int posX, int posY)
     {
@@ -244,6 +259,18 @@ public class Game : MonoBehaviour
 
             aliveChance = value;
         }
+    #region Customrules
+
+        public void CustomRules(bool value)
+        {
+            customRules = value;
+        }
+        public void Gravity(bool value)
+        {
+            gravityIshRule = value;
+        }
+
+    #endregion
 
     #endregion
 }
