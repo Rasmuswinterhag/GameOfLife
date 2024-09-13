@@ -9,7 +9,7 @@ public class Cell
     public bool willBeAlive;
     SpriteRenderer sr;
     public Vector2 position;
-    int stableTicks = 0;
+    public int stableTicks = 0;
 
     public Cell(SpriteRenderer spriteRenderer, float aliveChance, Vector2 spawnPosition)
     {
@@ -64,6 +64,8 @@ public class Game : MonoBehaviour
     [Header("Custom Rules")]
     [SerializeField] bool customRules = false;
     [SerializeField] bool gravityIshRule = false;
+    [SerializeField] bool stableDecay = false;
+    [SerializeField] int ticksUntilDecay = 250;
 
     [Header("UI References")]
     [SerializeField] UIManager canvas;
@@ -78,6 +80,8 @@ public class Game : MonoBehaviour
     float tickTimer = 0;
     Vector2Int lastDrawPos;
     bool drew;
+
+    SpriteRenderer sr;
 
     void Start()
     {
@@ -99,7 +103,7 @@ public class Game : MonoBehaviour
 
             for (int y = 0; y < gameSize.y; y++)
             {
-                var sr = Instantiate(spriteRendererPrefab, new Vector2(x, y), Quaternion.identity, transform);
+                sr = Instantiate(spriteRendererPrefab, new Vector2(x, y), Quaternion.identity, transform);
                 grid[x][y] = new Cell(sr, aliveChance, new Vector2(x,y));
             }
         }
@@ -146,8 +150,11 @@ public class Game : MonoBehaviour
 
     void CustomRules(int x, int y, int aliveNeighbors)
     {
-        if(gravityIshRule && y+1 < gameSize.y-1) { if(aliveNeighbors == 1 && grid[x][y+1].alive) { grid[x][y].willBeAlive = true;} } //kinda adds gravity
-    } 
+        if( gravityIshRule && y+1 < gameSize.y-1 ) { if(aliveNeighbors == 1 && grid[x][y+1].alive) { grid[x][y].willBeAlive = true;} } //kinda adds gravity
+
+        if( stableDecay && grid[x][y].stableTicks > ticksUntilDecay ) { grid[x][y].willBeAlive = false; grid[x][y].stableTicks = 0;} //we pray that my problems are gone
+        
+    }
 
     int AliveNeighbors(int posX, int posY)
     {
@@ -157,7 +164,7 @@ public class Game : MonoBehaviour
         {
             for (int j = -1; j <= 1; j++)
             {
-                if(posX+i < 0 || posX+i > gameSize.x-1 || posY+j < 0 || posY+j > gameSize.y-1 || (i == 0 && j == 0)) {continue;}
+                if(posX+i < 0 || posX+i > gameSize.x-1 || posY+j < 0 || posY+j > gameSize.y-1 || (i == 0 && j == 0)) {continue;}    
                 if(grid[posX+i][posY+j].alive)
                 {
                     aliveNeighbors++;
@@ -259,7 +266,8 @@ public class Game : MonoBehaviour
 
             aliveChance = value;
         }
-    #region Customrules
+
+    #region Custom Rules UI
 
         public void CustomRules(bool value)
         {
@@ -268,6 +276,10 @@ public class Game : MonoBehaviour
         public void Gravity(bool value)
         {
             gravityIshRule = value;
+        }
+        public void Decay(bool value)
+        {
+            stableDecay = value;
         }
 
     #endregion
